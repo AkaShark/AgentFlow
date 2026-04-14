@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: agentflow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: agentflow
+      POSTGRES_PASSWORD: agentflow
+      POSTGRES_DB: agentflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - agentflow-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.server
+    container_name: agentflow-server
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://agentflow:agentflow@postgres:5432/agentflow?schema=public
+      PORT: 4000
+      HOST: 0.0.0.0
+      AGENTFLOW_EVENTS_DIR: /data/events
+    ports:
+      - "4000:4000"
+    volumes:
+      - agentflow-events:/data/events
+      # Mount target project read-only so the scanner can see it.
+      # Override AGENTFLOW_PROJECT_MOUNT to point at your project.
+      - ${AGENTFLOW_PROJECT_MOUNT:-./placeholder}:/projects:ro
+
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.web
+    container_name: agentflow-web
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "5173:80"
+
+volumes:
+  agentflow-pgdata:
+  agentflow-events:

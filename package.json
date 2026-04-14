@@ -1,0 +1,28 @@
+{
+  "name": "agentflow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local dashboard to visualize how AI agent skills, subagents, commands and hooks are wired and triggered.",
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "db:migrate": "pnpm --filter @agentflow/server run prisma:migrate",
+    "db:generate": "pnpm --filter @agentflow/server run prisma:generate",
+    "compose": "bash scripts/compose.sh",
+    "compose:up": "bash scripts/compose.sh up -d",
+    "compose:down": "bash scripts/compose.sh down",
+    "compose:logs": "bash scripts/compose.sh logs -f"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "@types/node": "^20.12.0",
+    "tsx": "^4.19.0"
+  },
+  "packageManager": "pnpm@9.12.0"
+}

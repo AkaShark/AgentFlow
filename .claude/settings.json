@@ -1,0 +1,56 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/sharker/Desktop/Project/Person/AI/Tool/AgentFlow/.agentflow/hook-forwarder.mjs PreToolUse"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/sharker/Desktop/Project/Person/AI/Tool/AgentFlow/.agentflow/hook-forwarder.mjs PostToolUse"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/sharker/Desktop/Project/Person/AI/Tool/AgentFlow/.agentflow/hook-forwarder.mjs UserPromptSubmit"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/sharker/Desktop/Project/Person/AI/Tool/AgentFlow/.agentflow/hook-forwarder.mjs SessionStart"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/sharker/Desktop/Project/Person/AI/Tool/AgentFlow/.agentflow/hook-forwarder.mjs SessionEnd"
+          }
+        ]
+      }
+    ]
+  }
+}

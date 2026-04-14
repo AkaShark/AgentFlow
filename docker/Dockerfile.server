@@ -1,0 +1,29 @@
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
+
+COPY pnpm-workspace.yaml package.json tsconfig.base.json ./
+COPY packages/core/package.json ./packages/core/
+COPY packages/adapters/claude-code/package.json ./packages/adapters/claude-code/
+COPY packages/server/package.json ./packages/server/
+
+RUN pnpm install --frozen-lockfile=false
+
+COPY packages/core ./packages/core
+COPY packages/adapters/claude-code ./packages/adapters/claude-code
+COPY packages/server ./packages/server
+
+RUN pnpm --filter @agentflow/server run prisma:generate
+RUN pnpm --filter @agentflow/core run build
+RUN pnpm --filter @agentflow/adapter-claude-code run build
+RUN pnpm --filter @agentflow/server run build
+
+FROM node:20-alpine
+WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
+
+COPY --from=builder /app /app
+
+EXPOSE 4000
+CMD ["node", "packages/server/dist/index.js"]

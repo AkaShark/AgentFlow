@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String     @id @default(cuid())
+  name        String
+  rootPath    String     @unique
+  adapterId   String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  resources   Resource[]
+  events      Event[]
+}
+
+model Resource {
+  id           String     @id
+  projectId    String
+  type         String     // skill | agent | command | hook
+  name         String
+  filePath     String
+  description  String?
+  metadata     Json
+  rawContent   String?
+  scannedAt    DateTime   @default(now())
+
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  outRelations Relation[] @relation("source")
+  inRelations  Relation[] @relation("target")
+  events       Event[]
+
+  @@index([projectId, type])
+}
+
+model Relation {
+  id         String   @id @default(cuid())
+  sourceId   String
+  targetId   String
+  kind       String   // calls | triggeredBy | references
+  confidence String   // static | inferred
+
+  source     Resource @relation("source", fields: [sourceId], references: [id], onDelete: Cascade)
+  target     Resource @relation("target", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceId, targetId, kind])
+  @@index([sourceId])
+  @@index([targetId])
+}
+
+model Event {
+  id            String   @id // ULID from event.eventId
+  projectId     String
+  sessionId     String
+  adapterId     String
+  type          String
+  resourceId    String?
+  parentEventId String?
+  timestamp     DateTime
+  durationMs    Int?
+  payload       Json
+  meta          Json?
+
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  resource      Resource? @relation(fields: [resourceId], references: [id], onDelete: SetNull)
+
+  @@index([projectId, timestamp])
+  @@index([sessionId])
+  @@index([resourceId])
+}
