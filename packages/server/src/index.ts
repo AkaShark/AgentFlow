@@ -11,6 +11,7 @@ import { projectsRouter } from './routes/projects.js';
 import { resourcesRouter } from './routes/resources.js';
 import { eventsRouter } from './routes/events.js';
 import { graphRouter } from './routes/graph.js';
+import { treeRouter } from './routes/tree.js';
 
 const app = express();
 app.use(cors());
@@ -22,6 +23,7 @@ app.use('/api/projects', projectsRouter);
 app.use('/api/resources', resourcesRouter);
 app.use('/api/events', eventsRouter);
 app.use('/api/graph', graphRouter);
+app.use('/api/tree', treeRouter);
 
 const server = http.createServer(app);
 createWebSocketServer(server);

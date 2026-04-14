@@ -8,6 +8,7 @@ export const router = createRouter({
     { path: '/flowchart', component: () => import('@/views/FlowchartView.vue'), meta: { title: 'Flowchart' } },
     { path: '/timeline', component: () => import('@/views/TimelineView.vue'), meta: { title: 'Timeline' } },
     { path: '/table', component: () => import('@/views/TableView.vue'), meta: { title: 'Table' } },
+    { path: '/trace', component: () => import('@/views/TraceView.vue'), meta: { title: 'Trace' } },
     { path: '/about', component: () => import('@/views/AboutView.vue'), meta: { title: 'About' } },
   ],
 });

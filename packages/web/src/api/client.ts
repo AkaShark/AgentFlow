@@ -115,6 +115,44 @@ export const GraphApi = {
   get: (projectId: string) => api.get<GraphDTO>('/graph', { params: { projectId } }).then((r) => r.data),
 };
 
+export type SpanType =
+  | 'session' | 'user_prompt' | 'tool' | 'agent' | 'skill' | 'command' | 'hook' | 'other';
+
+export interface CallSpanDTO {
+  id: string;
+  parentId: string | null;
+  sessionId: string;
+  projectId: string;
+  type: SpanType;
+  name: string;
+  resourceId?: string;
+  startTime: string;
+  endTime: string | null;
+  durationMs: number | null;
+  selfTimeMs: number | null;
+  depth: number;
+  open: boolean;
+  children: CallSpanDTO[];
+  payload?: Record<string, unknown>;
+}
+
+export interface SessionTraceDTO {
+  sessionId: string;
+  projectId: string;
+  startTime: string;
+  endTime: string;
+  durationMs: number;
+  eventCount: number;
+  root: CallSpanDTO;
+}
+
+export const TreeApi = {
+  list: (projectId: string, sessionId?: string) =>
+    api
+      .get<SessionTraceDTO[]>('/tree', { params: { projectId, sessionId } })
+      .then((r) => r.data),
+};
+
 export function connectEventStream(onEvent: (event: EventDTO) => void): WebSocket {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   const ws = new WebSocket(`${proto}://${location.host}/ws/events`);

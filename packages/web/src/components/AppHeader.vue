@@ -27,6 +27,7 @@ const navItems: NavItem[] = [
   { key: 'projects',  label: 'Projects',  icon: '◉', to: '/projects',  needsProject: false },
   { key: 'flowchart', label: 'Flowchart', icon: '⌬', to: '/flowchart', needsProject: true },
   { key: 'timeline',  label: 'Timeline',  icon: '◷', to: '/timeline',  needsProject: true },
+  { key: 'trace',     label: 'Trace',     icon: '⇄', to: '/trace',     needsProject: true },
   { key: 'table',     label: 'Table',     icon: '☷', to: '/table',     needsProject: true },
   { key: 'about',     label: 'About',     icon: '✦', to: '/about',     needsProject: false },
 ];

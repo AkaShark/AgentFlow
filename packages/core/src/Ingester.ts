@@ -1,4 +1,5 @@
 import { createReadStream } from 'node:fs';
+import { stat } from 'node:fs/promises';
 import { createInterface } from 'node:readline';
 import chokidar from 'chokidar';
 import type { AdapterRegistry } from './AdapterRegistry.js';
@@ -17,17 +18,36 @@ export class Ingester {
   watch(eventsDir: string): chokidar.FSWatcher {
     const watcher = chokidar.watch(`${eventsDir}/*.jsonl`, {
       persistent: true,
-      awaitWriteFinish: { stabilityThreshold: 100, pollInterval: 50 },
+      awaitWriteFinish: { stabilityThreshold: 80, pollInterval: 40 },
     });
 
     watcher.on('add', (path) => this.processFile(path));
     watcher.on('change', (path) => this.processFile(path));
+    watcher.on('unlink', (path) => {
+      // File was removed — drop the offset so a future re-creation starts fresh.
+      this.offsets.delete(path);
+    });
 
     return watcher;
   }
 
   private async processFile(path: string): Promise<void> {
-    const start = this.offsets.get(path) ?? 0;
+    let size = 0;
+    try {
+      size = (await stat(path)).size;
+    } catch {
+      return;
+    }
+    let start = this.offsets.get(path) ?? 0;
+    // Handle truncation / rm+recreate: if the file is smaller than our cached
+    // offset, the old file is gone — re-read from the top.
+    if (size < start) start = 0;
+    if (size === 0) {
+      this.offsets.set(path, 0);
+      return;
+    }
+    if (size === start) return; // nothing new
+
     const stream = createReadStream(path, { start });
     const rl = createInterface({ input: stream, crlfDelay: Infinity });
 

@@ -1,4 +1,4 @@
-import { ulid } from 'ulid';
+import crypto from 'node:crypto';
 import type { AgentEvent, AgentEventType } from '@agentflow/core';
 
 interface RawClaudeHookEvent {
@@ -27,7 +27,7 @@ export function parseClaudeEvent(rawLine: string): AgentEvent | null {
 
   return {
     v: 1,
-    eventId: data.af_event_id ?? ulid(),
+    eventId: data.af_event_id ?? stableEventId(rawLine),
     timestamp: data.timestamp ?? new Date().toISOString(),
     adapterId: 'claude-code',
     sessionId: data.session_id ?? 'unknown',
@@ -37,6 +37,13 @@ export function parseClaudeEvent(rawLine: string): AgentEvent | null {
     parentEventId: data.af_parent_event_id,
     payload: data as Record<string, unknown>,
   };
+}
+
+// Deterministic ID derived from the raw JSONL line so re-reads of the same
+// file never create duplicate rows (upsert becomes a no-op).
+function stableEventId(rawLine: string): string {
+  const hash = crypto.createHash('sha256').update(rawLine).digest('hex');
+  return `sha256:${hash.slice(0, 26)}`;
 }
 
 function mapHookEventType(hookName: string): AgentEventType {
